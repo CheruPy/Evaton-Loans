@@ -312,79 +312,93 @@
     <p>&copy; 2025 Evaton Loans Financial Services. NMLS #1234567. *Terms and conditions apply.</p>
   </footer>
 
-  <script>
-    // Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('Service Worker registered:', reg.scope))
-          .catch(err => console.log('Service Worker failed:', err));
+<script>
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('Service Worker registered:', reg.scope))
+        .catch(err => console.log('Service Worker failed:', err));
+    });
+  }
+
+  // PWA Install
+  let deferredPrompt;
+  const pwaInstallPopup = document.getElementById('pwa-install-popup');
+  let popupInterval;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    if (!localStorage.getItem('pwaInstallPromptDismissed')) {
+      // Keep showing popup every second
+      popupInterval = setInterval(() => {
+        pwaInstallPopup.style.display = 'flex';
+      }, 1000);
+    }
+  });
+
+  function installPWA() {
+    pwaInstallPopup.style.display = 'none';
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          gtag('event', 'pwa_install_click', { event_category: 'PWA', event_label: 'Install Popup' });
+          localStorage.setItem('pwaInstallPromptDismissed', 'true');
+          clearInterval(popupInterval); // stop nagging
+        }
+        deferredPrompt = null;
       });
     }
+  }
 
-    // PWA Install
-    let deferredPrompt;
-    const pwaInstallPopup = document.getElementById('pwa-install-popup');
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      if (!localStorage.getItem('pwaInstallPromptDismissed')) {
-        setTimeout(() => {
-          pwaInstallPopup.style.display = 'flex';
-        }, 1000);
-      }
-    });
-
-    function installPWA() {
+  // Dismiss if user clicks outside popup
+  pwaInstallPopup.addEventListener('click', (e) => {
+    if (e.target.id === 'pwa-install-popup') {
       pwaInstallPopup.style.display = 'none';
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            gtag('event', 'pwa_install_click', { event_category: 'PWA', event_label: 'Install Popup' });
-            localStorage.setItem('pwaInstallPromptDismissed', 'true');
-          }
-          deferredPrompt = null;
-        });
-      }
+      localStorage.setItem('pwaInstallPromptDismissed', 'true');
+      clearInterval(popupInterval); // stop nagging
     }
+  });
 
-    // Loan Application Button
-    const termsCheckbox = document.getElementById('terms');
-    const nextButton = document.getElementById('nextBtn');
-    const loadingOverlay = document.querySelector('.loading-overlay');
-    const termsLink = document.getElementById('termsLink');
+  // Loan Application Button
+  const termsCheckbox = document.getElementById('terms');
+  const nextButton = document.getElementById('nextBtn');
+  const loadingOverlay = document.querySelector('.loading-overlay');
+  const termsLink = document.getElementById('termsLink');
 
-    nextButton.addEventListener('click', function() {
-      if (!termsCheckbox.checked) {
-        alert("Please agree to Terms & Conditions before continuing.");
-        return;
+  nextButton.addEventListener('click', function() {
+    if (!termsCheckbox.checked) {
+      alert("Please agree to Terms & Conditions before continuing.");
+      return;
+    }
+    this.innerHTML = 'Please wait...';
+    this.style.opacity = '0.8';
+    loadingOverlay.style.display = 'flex';
+
+    setTimeout(() => {
+      this.innerHTML = 'Proceed to Loan Application';
+      this.style.opacity = '1';
+      loadingOverlay.style.display = 'none';
+      if (localStorage.getItem('review')) {
+        window.location.href = 'reviewpage.html';
+      } else {
+        window.location.href = 'login.html';
       }
-      this.innerHTML = 'Please wait...';
-      this.style.opacity = '0.8';
-      loadingOverlay.style.display = 'flex';
+    }, 2000);
+  });
 
-      setTimeout(() => {
-        this.innerHTML = 'Proceed to Loan Application';
-        this.style.opacity = '1';
-        loadingOverlay.style.display = 'none';
-        if (localStorage.getItem('review')) {
-          window.location.href = 'reviewpage.html';
-        } else {
-          window.location.href = 'login.html';
-        }
-      }, 2000);
-    });
-
-    // Terms link
-    termsLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      loadingOverlay.style.display = 'flex';
-      setTimeout(() => {
-        loadingOverlay.style.display = 'none';
-        window.location.href = '/terms.html';
-      }, 2000);
-    });
-  </script>
+  // Terms link
+  termsLink.addEventListener('click', function(e) {
+    e.preventDefault();
+    loadingOverlay.style.display = 'flex';
+    setTimeout(() => {
+      loadingOverlay.style.display = 'none';
+      window.location.href = '/terms.html';
+    }, 2000);
+  });
+</script>
 </body>
 </html>
