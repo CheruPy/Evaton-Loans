@@ -185,6 +185,7 @@
         proceedBtn.addEventListener('click', () => {
             if (selectedOption) {
                 localStorage.setItem('limit',selectedOption.limit)
+                localStorage.setItem('savings', selectedOption.savings); // this line is KEY
                 window.location.href = 'upplication-details.html';
                 //alert(`Selected: Ksh ${selectedOption.savings} savings with Ksh ${selectedOption.limit} limit`);
             }

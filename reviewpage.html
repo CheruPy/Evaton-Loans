@@ -205,16 +205,21 @@
         © Evaton Loans 2025
     </div>
     <script>
-        let limit = document.getElementById('limit');
-        let savingsamount = document.getElementById('savingamount');
-        let lims = 0.00;
-        let savingamount = 0.00;
-        lims = parseFloat(localStorage.getItem('limit'));    
-        savingamount = parseFloat(localStorage.getItem('saveamount'));        
-        limit.textContent = "Ksh " + (lims.toFixed(2));
-        savingsamount.textContent = "Ksh " + (savingamount.toFixed(2));        
-            const loanType = localStorage.getItem("name") || "Education Loan";
-            document.getElementById("loan-type").textContent = loanType;
-    </script>
+    let limit = document.getElementById('limit');
+    let savingsamount = document.getElementById('savingamount');
+
+    // Get stored values
+    let lims = parseFloat(localStorage.getItem('limit')) || 0.00;
+    let savingamount = parseFloat(localStorage.getItem('savings')) || 0.00;  // ✅ fixed key
+
+    // Update UI
+    limit.textContent = "Ksh " + lims.toFixed(2);
+    savingsamount.textContent = "Ksh " + savingamount.toFixed(2);
+
+    // Loan type (fallback to Education Loan if not found)
+    const loanType = localStorage.getItem("name") || "Education Loan";
+    document.getElementById("loan-type").textContent = loanType;
+</script>
+
 </body>
 </html>
